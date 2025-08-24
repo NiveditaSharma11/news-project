@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>News Bias & Summary</title>
+  <style>
+    body {
+      background-color: #121212;
+      color: #ffffff;
+      font-family: Arial, sans-serif;
+      padding: 20px;
+    }
+
+    h1 {
+      text-align: center;
+      color: #00ffc3;
+    }
+
+    textarea {
+      width: 100%;
+      height: 150px;
+      margin-bottom: 20px;
+      background-color: #1e1e1e;
+      color: #ffffff;
+      border: 1px solid #333;
+      padding: 10px;
+      font-size: 16px;
+      border-radius: 8px;
+    }
+
+    button {
+      background-color: #00ffc3;
+      color: #000;
+      border: none;
+      padding: 10px 20px;
+      font-size: 16px;
+      border-radius: 6px;
+      cursor: pointer;
+      margin-right: 10px;
+    }
+
+    button:hover {
+      background-color: #00e6b0;
+    }
+
+    .output {
+      background-color: #1e1e1e;
+      border: 1px solid #333;
+      padding: 15px;
+      border-radius: 8px;
+      margin-top: 20px;
+      white-space: pre-wrap;
+    }
+  </style>
+</head>
+<body>
+  <h1>News Bias & Summary Detector</h1>
+  <textarea id="newsInput" placeholder="Paste your news article here..."></textarea>
+  <br>
+  <button onclick="getSummary()">Get Summary</button>
+  <button onclick="getBias()">Check Bias</button>
+
+  <div class="output" id="summaryOutput"></div>
+  <div class="output" id="biasOutput"></div>
+
+  <script>
+    async function getSummary() {
+      const text = document.getElementById("newsInput").value;
+      const response = await fetch("http://localhost:8000/summary", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ text })
+      });
+
+      const result = await response.json();
+      document.getElementById("summaryOutput").innerText = "Summary: " + result.summary;
+    }
+
+    async function getBias() {
+      const text = document.getElementById("newsInput").value;
+      const response = await fetch("http://localhost:8000/bias", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ text })
+      });
+
+      const result = await response.json();
+      document.getElementById("biasOutput").innerText = "Bias: " + result.bias;
+    }
+  </script>
+</body>
+</html>
