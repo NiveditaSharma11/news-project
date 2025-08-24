@@ -1,4 +1,8 @@
 fastapi==0.116.1
-transformers==4.55.4
 uvicorn
+transformers==4.55.4
+torch
+python-multipart
+pydantic
+
 
