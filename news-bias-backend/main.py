@@ -8,11 +8,7 @@ app = FastAPI()
 # Allow CORS (adjust origins if needed)
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[
-        "http://127.0.0.1:5500",           # local frontend
-        "https://news-project-i5qv.onrender.com"  # deployed backend itself
-    ],
-    allow_credentials=True,
+     allow_origins=["https://news-frontend-9ot1.onrender.com"], 
     allow_methods=["*"],
     allow_headers=["*"],
 )
