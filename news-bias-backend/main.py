@@ -21,6 +21,9 @@ def get_summarizer():
 @app.get("/")
 def root():
     return {"message": "API is running"}
+@app.head("/")
+def root_head():
+    return {"message": "API is running"}
 
 @app.post("/summary")
 async def generate_summary(request: Request):
