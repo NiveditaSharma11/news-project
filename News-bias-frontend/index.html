@@ -1,97 +1,158 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>News Bias & Summary</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>News Summarizer</title>
   <style>
     body {
       background-color: #121212;
-      color: #ffffff;
+      color: #e0e0e0;
       font-family: Arial, sans-serif;
+      text-align: center;
       padding: 20px;
     }
 
     h1 {
-      text-align: center;
-      color: #00ffc3;
+      font-size: 2.5em;
+      color: #39ff14; /* Neon Green */
+      text-shadow: 0 0 10px #39ff14, 0 0 20px #39ff14, 0 0 30px #39ff14;
+      margin-bottom: 20px;
     }
 
     textarea {
-      width: 100%;
-      height: 150px;
-      margin-bottom: 20px;
+      width: 80%;
+      height: 120px;
       background-color: #1e1e1e;
-      color: #ffffff;
+      color: #fff;
       border: 1px solid #333;
+      border-radius: 8px;
       padding: 10px;
-      font-size: 16px;
-      border-radius: 8px;
+      font-size: 1em;
+      resize: none;
+      margin-bottom: 15px;
     }
 
-    button {
-      background-color: #00ffc3;
-      color: #000;
-      border: none;
-      padding: 10px 20px;
-      font-size: 16px;
-      border-radius: 6px;
-      cursor: pointer;
-      margin-right: 10px;
-    }
-
-    button:hover {
-      background-color: #00e6b0;
-    }
-
-    .output {
+    select, button {
       background-color: #1e1e1e;
-      border: 1px solid #333;
-      padding: 15px;
+      color: #fff;
+      border: 1px solid #39ff14;
       border-radius: 8px;
+      padding: 10px 15px;
+      margin: 5px;
+      cursor: pointer;
+      font-size: 1em;
+      transition: 0.3s;
+    }
+
+    button:hover, select:hover {
+      background-color: #39ff14;
+      color: #121212;
+    }
+
+    #outputBox {
       margin-top: 20px;
-      white-space: pre-wrap;
+      padding: 15px;
+      border: 2px solid #39ff14;
+      border-radius: 8px;
+      background-color: #1e1e1e;
+      width: 80%;
+      margin-left: auto;
+      margin-right: auto;
+      color: #fff;
+      min-height: 60px;
     }
   </style>
 </head>
 <body>
-  <h1>News Bias & Summary Detector</h1>
-  <textarea id="newsInput" placeholder="Paste your news article here..."></textarea>
-  <br>
+
+  <h1>📰 News Summarizer</h1>
+
+  <textarea id="newsInput" placeholder="Paste your news text here..."></textarea><br/>
+
+  <label for="toneSelect">Choose Summary Tone:</label>
+  <select id="toneSelect">
+    <option value="neutral">Neutral</option>
+    <option value="formal">Formal</option>
+    <option value="casual">Casual</option>
+  </select><br/>
+
   <button onclick="getSummary()">Get Summary</button>
   <button onclick="getBias()">Check Bias</button>
 
-  <div class="output" id="summaryOutput"></div>
-  <div class="output" id="biasOutput"></div>
+  <div id="outputBox">📝 Output will appear here.</div>
 
   <script>
     async function getSummary() {
       const text = document.getElementById("newsInput").value;
-      const response = await fetch("http://localhost:8000/summary", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({ text })
-      });
+      const tone = document.getElementById("toneSelect").value;
 
-      const result = await response.json();
-      document.getElementById("summaryOutput").innerText = "Summary: " + result.summary;
+      if (!text.trim()) {
+        document.getElementById("outputBox").innerText = "⚠️ Please enter news content.";
+        return;
+      }
+
+      try {
+        const response = await fetch("http://127.0.0.1:8000/summary", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({ text: text, tone: tone })
+        });
+
+        if (!response.ok) {
+          throw new Error(`Server error: ${response.status}`);
+        }
+
+        const data = await response.json();
+
+        if (data.summary) {
+          document.getElementById("outputBox").innerText = "📄 Summary: " + data.summary;
+        } else {
+          document.getElementById("outputBox").innerText = "⚠️ Unexpected response from server.";
+        }
+      } catch (err) {
+        console.error("Summary error:", err);
+        document.getElementById("outputBox").innerText = "❌ Error: Could not fetch summary.";
+      }
     }
 
     async function getBias() {
       const text = document.getElementById("newsInput").value;
-      const response = await fetch("http://localhost:8000/bias", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({ text })
-      });
 
-      const result = await response.json();
-      document.getElementById("biasOutput").innerText = "Bias: " + result.bias;
+      if (!text.trim()) {
+        document.getElementById("outputBox").innerText = "⚠️ Please enter news content.";
+        return;
+      }
+
+      try {
+        const response = await fetch("http://127.0.0.1:8000/bias", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({ text: text })
+        });
+
+        if (!response.ok) {
+          throw new Error(`Server error: ${response.status}`);
+        }
+
+        const data = await response.json();
+
+        if (data.bias && data.confidence) {
+          document.getElementById("outputBox").innerText =
+            `🧠 Bias: ${data.bias} (Confidence: ${data.confidence})`;
+        } else {
+          document.getElementById("outputBox").innerText = "⚠️ Unexpected response from server.";
+        }
+      } catch (err) {
+        console.error("Bias error:", err);
+        document.getElementById("outputBox").innerText = "❌ Error: Could not fetch bias.";
+      }
     }
   </script>
+
 </body>
 </html>
