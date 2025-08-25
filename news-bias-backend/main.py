@@ -1,6 +1,7 @@
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
 from transformers import pipeline
+from functools import lru_cache
 
 app = FastAPI()
 
@@ -12,8 +13,10 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Load Hugging Face summarizer model once
-summarizer = pipeline("summarization", model="facebook/bart-large-cnn")
+# ✅ Lazy load Hugging Face summarizer model
+@lru_cache(maxsize=1)
+def get_summarizer():
+    return pipeline("summarization", model="facebook/bart-large-cnn")
 
 @app.get("/")
 def root():
@@ -29,6 +32,9 @@ async def generate_summary(request: Request):
         if not text:
             raise HTTPException(status_code=400, detail="Text input is required.")
 
+        # ✅ Load model only on first call
+        summarizer = get_summarizer()
+
         # Generate summary
         summary = summarizer(
             text,
@@ -42,7 +48,7 @@ async def generate_summary(request: Request):
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error generating summary: {str(e)}")
 
-# ✅ Updated bias route with confidence
+# ✅ Bias detection route (unchanged)
 @app.post("/bias")
 async def check_bias(request: Request):
     try:
