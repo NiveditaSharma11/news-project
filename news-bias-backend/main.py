@@ -5,15 +5,16 @@ from functools import lru_cache
 
 app = FastAPI()
 
-# Allow CORS (adjust origins if needed)
+# ✅ Allow CORS - FINAL FIX
 app.add_middleware(
     CORSMiddleware,
-     allow_origins=["https://news-frontend-9ot1.onrender.com"], 
+    allow_origins=["https://news-frontend-9ot1.onrender.com"],  # your frontend URL
+    allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-# ✅ Lazy load Hugging Face summarizer model
+# ✅ Lazy load summarizer
 @lru_cache(maxsize=1)
 def get_summarizer():
     return pipeline("summarization", model="facebook/bart-large-cnn")
@@ -21,6 +22,7 @@ def get_summarizer():
 @app.get("/")
 def root():
     return {"message": "API is running"}
+
 @app.head("/")
 def root_head():
     return {"message": "API is running"}
@@ -30,18 +32,16 @@ async def generate_summary(request: Request):
     try:
         payload = await request.json()
         text = payload.get("text", "")
-        tone = payload.get("tone", "neutral")  # Optional use
+        tone = payload.get("tone", "neutral")  # optional tone
 
         if not text:
             raise HTTPException(status_code=400, detail="Text input is required.")
 
-        # ✅ Load model only on first call
         summarizer = get_summarizer()
 
-        # Generate summary
         summary = summarizer(
             text,
-            max_length=200,  # you can increase this if needed
+            max_length=200,
             min_length=50,
             do_sample=False
         )[0]["summary_text"]
@@ -51,7 +51,6 @@ async def generate_summary(request: Request):
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error generating summary: {str(e)}")
 
-# ✅ Bias detection route (unchanged)
 @app.post("/bias")
 async def check_bias(request: Request):
     try:
@@ -75,7 +74,7 @@ async def check_bias(request: Request):
 
         return {
             "bias": bias,
-            "confidence": round(confidence * 100, 2)  # Return percentage
+            "confidence": round(confidence * 100, 2)
         }
 
     except Exception as e:
