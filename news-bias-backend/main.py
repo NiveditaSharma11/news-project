@@ -8,12 +8,11 @@ app = FastAPI()
 # ✅ Allow CORS - FINAL FIX
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["https://news-frontend-9ot1.onrender.com"],  # your frontend URL
+    allow_origins=["http://127.0.0.1:5500", "https://news-frontend-9ot1.onrender.com"],  # Add your frontend URLs
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
-
 # ✅ Lazy load summarizer
 @lru_cache(maxsize=1)
 def get_summarizer():
