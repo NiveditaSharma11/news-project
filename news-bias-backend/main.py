@@ -5,11 +5,12 @@ from functools import lru_cache
 
 app = FastAPI()
 
-# ✅ CORS
+# ✅ CORS: includes localhost and 127.0.0.1 for local testing
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[
         "http://localhost:5500",
+        "http://127.0.0.1:5500",
         "https://news-frontend-9ot1.onrender.com"
     ],
     allow_credentials=True,
@@ -17,12 +18,10 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# ✅ ping route for Render health check
 @app.get("/ping")
 def ping():
     return {"message": "pong"}
 
-# ✅ lazy load summarizer
 @lru_cache(maxsize=1)
 def get_summarizer():
     return pipeline("summarization", model="facebook/bart-large-cnn")

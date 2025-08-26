@@ -15,7 +15,7 @@
 
     h1 {
       font-size: 2.5em;
-      color: #39ff14; /* Neon Green */
+      color: #39ff14;
       text-shadow: 0 0 10px #39ff14, 0 0 20px #39ff14, 0 0 30px #39ff14;
       margin-bottom: 20px;
     }
@@ -83,6 +83,11 @@
   <div id="outputBox">📝 Output will appear here.</div>
 
   <script>
+    // ✅ Auto-select API base URL based on environment
+    const apiBase = window.location.hostname.includes("localhost") || window.location.hostname.includes("127.0.0.1")
+      ? "http://127.0.0.1:8000"
+      : "https://news-project-i5qv.onrender.com";
+
     async function getSummary() {
       const text = document.getElementById("newsInput").value;
       const tone = document.getElementById("toneSelect").value;
@@ -93,7 +98,7 @@
       }
 
       try {
-        const response = await fetch("https://news-project-i5qv.onrender.com/summary", {
+        const response = await fetch(`${apiBase}/summary`, {
           method: "POST",
           headers: {
             "Content-Type": "application/json"
@@ -127,7 +132,7 @@
       }
 
       try {
-        const response = await fetch("https://news-project-i5qv.onrender.com/bias", {
+        const response = await fetch(`${apiBase}/bias`, {
           method: "POST",
           headers: {
             "Content-Type": "application/json"
